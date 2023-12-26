@@ -1,2 +1,2 @@
 # blackbox
-A Metal 2D rendering engine for abstract art and animations.
+A 3D render to help me create visualizations of audio files.
