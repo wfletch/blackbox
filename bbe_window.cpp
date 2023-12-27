@@ -1,4 +1,5 @@
 #include "bbe_window.hpp"
+
 #include <string>
 namespace bbe {
     BbeWindow::BbeWindow(int w, int h, std::string name) : width{w}, height {h}, windowName{name} {
