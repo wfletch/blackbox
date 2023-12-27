@@ -13,12 +13,14 @@ namespace bbe {
             BbeWindow &operator=(const BbeWindow &) = delete;
 
             bool shouldClose(){return glfwWindowShouldClose(window); };
+            void createWindowSurface(VkInstance instance, VkSurfaceKHR *surface);
         private:
         void initWindow();
         const int width;
         const int height;
         std::string windowName;
         GLFWwindow *window;
+        
 
     };
 }
