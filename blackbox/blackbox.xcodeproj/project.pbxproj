@@ -37,6 +37,8 @@
 		D39D5C052B3B20820009F5AC /* libglfw.3.3.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libglfw.3.3.dylib; path = ../../../../../../../opt/homebrew/lib/libglfw.3.3.dylib; sourceTree = "<group>"; };
 		D39D5C072B3B20D30009F5AC /* libvulkan.1.3.268.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.3.268.dylib; path = ../../../../../VulkanSDK/1.3.268.1/macOS/lib/libvulkan.1.3.268.dylib; sourceTree = "<group>"; };
 		D39D5C092B3B20D90009F5AC /* libvulkan.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libvulkan.1.dylib; path = ../../../../../VulkanSDK/1.3.268.1/macOS/lib/libvulkan.1.dylib; sourceTree = "<group>"; };
+		D39D5C192B3C10C70009F5AC /* scripts */ = {isa = PBXFileReference; lastKnownFileType = folder; path = scripts; sourceTree = "<group>"; };
+		D39D5C1B2B3C18E20009F5AC /* shaders */ = {isa = PBXFileReference; lastKnownFileType = folder; path = shaders; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -74,6 +76,8 @@
 		D39D5BFC2B3B18D70009F5AC /* blackbox */ = {
 			isa = PBXGroup;
 			children = (
+				D39D5C1B2B3C18E20009F5AC /* shaders */,
+				D39D5C192B3C10C70009F5AC /* scripts */,
 				D39D5BFD2B3B18D70009F5AC /* main.cpp */,
 			);
 			path = blackbox;
@@ -96,9 +100,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D39D5C012B3B18D70009F5AC /* Build configuration list for PBXNativeTarget "blackbox" */;
 			buildPhases = (
-				D39D5BF62B3B18D70009F5AC /* Sources */,
 				D39D5BF72B3B18D70009F5AC /* Frameworks */,
 				D39D5BF82B3B18D70009F5AC /* CopyFiles */,
+				D39D5BF62B3B18D70009F5AC /* Sources */,
 			);
 			buildRules = (
 			);
