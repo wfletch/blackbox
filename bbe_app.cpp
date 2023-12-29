@@ -6,8 +6,9 @@
 namespace bbe {
 
     FirstApp::FirstApp() {
+        loadModels();
         createPipelineLayout();
-        createPipeline();
+        recreateSwapChain();
         createCommandBuffers();
     }
 
@@ -28,7 +29,31 @@ namespace bbe {
         vkDeviceWaitIdle(bbeDevice.device());
         std::cout << "Done" << "\n";
     }
-
+    
+    void FirstApp::sierpinski(
+        std::vector<BbeModel::Vertex> &vertices,
+        int depth,
+        glm::vec2 left,
+        glm::vec2 right,
+        glm::vec2 top) {
+    if (depth <= 0) {
+        vertices.push_back({top, {1.0f,0.0f,0.0f}});
+        vertices.push_back({right, {0.0f,1.0f,0.0f}});
+        vertices.push_back({left, {0.0f,0.0f,1.0f}});
+    } else {
+        auto leftTop = 0.5f * (left + top);
+        auto rightTop = 0.5f * (right + top);
+        auto leftRight = 0.5f * (left + right);
+        sierpinski(vertices, depth - 1, left, leftRight, leftTop);
+        sierpinski(vertices, depth - 1, leftRight, right, rightTop);
+        sierpinski(vertices, depth - 1, leftTop, rightTop, top);
+    }
+    }
+    void FirstApp::loadModels() {
+        std::vector<BbeModel::Vertex> vertices{};
+        sierpinski(vertices, 0, {-0.5f, 0.5f}, {0.5f, 0.5f}, {0.0f, -0.5f});
+        bbeModel = std::make_unique<BbeModel>(bbeDevice, vertices);
+    }
 
     void FirstApp::createPipelineLayout() {
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
@@ -45,8 +70,11 @@ namespace bbe {
 
 
     void FirstApp::createPipeline() {
-        auto pipelineConfig = BbePipeline::defaultPipelineConfigInfo(bbeSwapChain.width(), bbeSwapChain.height());
-        pipelineConfig.renderPass = bbeSwapChain.getRenderPass();
+        assert(bbeSwapChain != nullptr && "Cannot create pipeline before swap chain");
+        assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
+        PipelineConfigInfo pipelineConfig{};
+        BbePipeline::defaultPipelineConfigInfo(pipelineConfig);
+        pipelineConfig.renderPass = bbeSwapChain->getRenderPass();
         pipelineConfig.pipelineLayout = pipelineLayout;
         bbePipeline = std::make_unique<BbePipeline>(bbeDevice, "compiled_shaders/simple_shader.vert.spv", "compiled_shaders/simple_shader.frag.spv",
         pipelineConfig);
@@ -55,7 +83,7 @@ namespace bbe {
 
 
     void FirstApp::createCommandBuffers() {
-        commandBuffers.resize(bbeSwapChain.imageCount());
+        commandBuffers.resize(bbeSwapChain->imageCount());
         VkCommandBufferAllocateInfo allocInfo{};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -71,20 +99,23 @@ namespace bbe {
 
         //Need to record command buffers
 
-        for (int i = 0; i < commandBuffers.size(); i++) {
+        
+
+    }
+    void FirstApp::recordCommandBuffer(int imageIndex){
             VkCommandBufferBeginInfo beginInfo{};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            if (vkBeginCommandBuffer(commandBuffers[i], &beginInfo) != VK_SUCCESS) {
+            if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
                 throw std::runtime_error("Fauled to begin recording command buffer");
             }
 
             VkRenderPassBeginInfo renderPassInfo{};
             renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassInfo.renderPass = bbeSwapChain.getRenderPass();
-            renderPassInfo.framebuffer = bbeSwapChain.getFrameBuffer(i);
+            renderPassInfo.renderPass = bbeSwapChain->getRenderPass();
+            renderPassInfo.framebuffer = bbeSwapChain->getFrameBuffer(imageIndex);
 
             renderPassInfo.renderArea.offset = {0,0};
-            renderPassInfo.renderArea.extent = bbeSwapChain.getSwapChainExtent();
+            renderPassInfo.renderArea.extent = bbeSwapChain->getSwapChainExtent();
 
             std::array<VkClearValue, 2> clearValues{};
             clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
@@ -94,26 +125,72 @@ namespace bbe {
             renderPassInfo.pClearValues = clearValues.data();
 
             // No mixing allowed, might not be useful
-            vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-            bbePipeline->bind(commandBuffers[i]);
+            vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-            // 3: 3 vertices, 1 Instance (Used for multiple copies of the same vertex data), 0 NO OFFSETS into our data... Even though we have no data.
-            vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
-            vkCmdEndRenderPass(commandBuffers[i]);
-            if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
+            VkViewport viewport{};
+            viewport.x = 0.0f;
+            viewport.y = 0.0f;
+            viewport.width = static_cast<float>(bbeSwapChain->getSwapChainExtent().width);
+            viewport.height = static_cast<float>(bbeSwapChain->getSwapChainExtent().height);
+            viewport.minDepth = 0.0f;
+            viewport.maxDepth = 1.0f;
+            VkRect2D scissor {{0,0}, bbeSwapChain->getSwapChainExtent()};
+            vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
+            vkCmdSetScissor(commandBuffers[imageIndex], 0,1, &scissor);
+             
+            bbePipeline->bind(commandBuffers[imageIndex]);
+            bbeModel->bind(commandBuffers[imageIndex]);
+            bbeModel->draw(commandBuffers[imageIndex]);
+            
+            vkCmdEndRenderPass(commandBuffers[imageIndex]);
+            if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
                 throw std::runtime_error("Failed to record command buffer");
             }
-        }   
+           
+    }
+    void FirstApp::freeCommandBuffers(){
+        vkFreeCommandBuffers(bbeDevice.device(),bbeDevice.getCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+        commandBuffers.clear();
+    }
+    
+    void FirstApp::recreateSwapChain() {
+        auto extent = bbeWindow.getExtent();
+        while (extent.width == 0 || extent.height == 0) {
+            extent = bbeWindow.getExtent();
+            glfwWaitEvents();
+        }
 
+        vkDeviceWaitIdle(bbeDevice.device());
+
+        if (bbeSwapChain == nullptr) {
+            bbeSwapChain = std::make_unique<BbeSwapChain>(bbeDevice, extent);
+            createPipeline();
+        } else {
+            bbeSwapChain = std::make_unique<BbeSwapChain>(bbeDevice, extent, std::move(bbeSwapChain));
+            if (bbeSwapChain->imageCount() != commandBuffers.size()){
+                freeCommandBuffers();
+                createCommandBuffers();
+            }
+        }
     }
     void FirstApp::drawFrame() {
         uint32_t imageIndex;
-        auto result = bbeSwapChain.acquireNextImage(&imageIndex);
+        auto result = bbeSwapChain->acquireNextImage(&imageIndex);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            recreateSwapChain();
+            return;
+        }
         if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
             throw std::runtime_error("Failed to acquire swap chain image");
         }
         // We have submitted the image.
-        result = bbeSwapChain.submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+        recordCommandBuffer(imageIndex);
+        result = bbeSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
+        if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || bbeWindow.wasWindowResized()){
+          bbeWindow.resetWindowResizedFlag();
+          recreateSwapChain();
+          return;  
+         }
         if (result != VK_SUCCESS) {
             throw std::runtime_error("Failed to present swap chain image!");
         }

@@ -8,7 +8,7 @@
 // std lib headers
 #include <string>
 #include <vector>
-
+#include <memory>
 namespace bbe {
 
 class BbeSwapChain {
@@ -16,10 +16,11 @@ class BbeSwapChain {
   static constexpr int MAX_FRAMES_IN_FLIGHT = 2;
 
   BbeSwapChain(BbeDevice &deviceRef, VkExtent2D windowExtent);
+  BbeSwapChain(BbeDevice &deviceRef, VkExtent2D windowExtent, std::shared_ptr<BbeSwapChain> previous);
   ~BbeSwapChain();
 
   BbeSwapChain(const BbeSwapChain &) = delete;
-  void operator=(const BbeSwapChain &) = delete;
+  BbeSwapChain operator=(const BbeSwapChain &) = delete;
 
   VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
   VkRenderPass getRenderPass() { return renderPass; }
@@ -39,6 +40,7 @@ class BbeSwapChain {
   VkResult submitCommandBuffers(const VkCommandBuffer *buffers, uint32_t *imageIndex);
 
  private:
+  void init();
   void createSwapChain();
   void createImageViews();
   void createDepthResources();
@@ -46,6 +48,7 @@ class BbeSwapChain {
   void createFramebuffers();
   void createSyncObjects();
 
+  std::shared_ptr<BbeSwapChain>oldSwapChain;
   // Helper functions
   VkSurfaceFormatKHR chooseSwapSurfaceFormat(
       const std::vector<VkSurfaceFormatKHR> &availableFormats);

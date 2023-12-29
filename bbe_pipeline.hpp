@@ -6,16 +6,21 @@
 namespace bbe 
 {
     struct PipelineConfigInfo {
-        VkViewport viewport;
-        VkRect2D scissor;
-        // 
+        PipelineConfigInfo(const PipelineConfigInfo&) = delete;
+        PipelineConfigInfo& operator=(const PipelineConfigInfo&) = delete;
+        // VkViewport viewport;
+        // VkRect2D scissor;
+        
+
+        VkPipelineViewportStateCreateInfo viewportInfo;
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
         VkPipelineRasterizationStateCreateInfo rasterizationInfo;
         VkPipelineMultisampleStateCreateInfo multisampleInfo;
         VkPipelineColorBlendAttachmentState colorBlendAttachment;
         VkPipelineColorBlendStateCreateInfo colorBlendInfo;
         VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
-
+        std::vector<VkDynamicState> dynamicStateEnables;
+        VkPipelineDynamicStateCreateInfo dynamicsStateInfo;
 
         // What are these?
         VkPipelineLayout pipelineLayout = nullptr;
@@ -35,10 +40,10 @@ namespace bbe
     ~BbePipeline();
 
     BbePipeline(const BbePipeline&) = delete;
-    void operator=(const BbePipeline&) = delete;
+    BbePipeline operator=(const BbePipeline&) = delete;
 
     void bind(VkCommandBuffer VkCommandBuffer);
-    static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
+    static void defaultPipelineConfigInfo(PipelineConfigInfo& configInfo);
     private:
 
     // This is potentially unsafe. But a device is needed if we have a pipeline.
