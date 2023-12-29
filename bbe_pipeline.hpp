@@ -8,7 +8,7 @@ namespace bbe
     struct PipelineConfigInfo {
         VkViewport viewport;
         VkRect2D scissor;
-        // VkPipelineViewportStateCreateInfo viewportInfo;
+        // 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
         VkPipelineRasterizationStateCreateInfo rasterizationInfo;
         VkPipelineMultisampleStateCreateInfo multisampleInfo;
@@ -33,9 +33,11 @@ namespace bbe
         const std::string& fragFilepath, 
         const PipelineConfigInfo& configInfo);
     ~BbePipeline();
+
     BbePipeline(const BbePipeline&) = delete;
     void operator=(const BbePipeline&) = delete;
 
+    void bind(VkCommandBuffer VkCommandBuffer);
     static PipelineConfigInfo defaultPipelineConfigInfo(uint32_t width, uint32_t height);
     private:
 

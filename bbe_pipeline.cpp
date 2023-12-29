@@ -116,7 +116,9 @@ namespace bbe {
 
 
     }
-    
+    void BbePipeline::bind(VkCommandBuffer commandBuffer){
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+    }
     void BbePipeline::createShaderModule(const std::vector<char>& code, VkShaderModule* shaderModule){
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
