@@ -87,6 +87,7 @@ void BbeDevice::createInstance() {
 
   auto extensions = getRequiredExtensions();
   extensions.emplace_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+  extensions.emplace_back("VK_KHR_get_physical_device_properties2");
   createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
   createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
   createInfo.ppEnabledExtensionNames = extensions.data();
@@ -95,6 +96,10 @@ void BbeDevice::createInstance() {
   if (enableValidationLayers) {
     createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
     createInfo.ppEnabledLayerNames = validationLayers.data();
+    for (uint32_t i = 0 ;i < createInfo.enabledLayerCount; i++) {
+      std::cout << createInfo.ppEnabledLayerNames[i]<< "\n";
+
+    }
 
     populateDebugMessengerCreateInfo(debugCreateInfo);
     createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *)&debugCreateInfo;

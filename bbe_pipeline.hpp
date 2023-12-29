@@ -5,7 +5,26 @@
 #include <vector>
 namespace bbe 
 {
-    struct PipelineConfigInfo {};
+    struct PipelineConfigInfo {
+        VkViewport viewport;
+        VkRect2D scissor;
+        VkPipelineViewportStateCreateInfo viewportInfo;
+        VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo;
+        VkPipelineRasterizationStateCreateInfo rasterizationInfo;
+        VkPipelineMultisampleStateCreateInfo multisampleInfo;
+        VkPipelineColorBlendAttachmentState colorBlendAttachment;
+        VkPipelineColorBlendStateCreateInfo colorBlendInfo;
+        VkPipelineDepthStencilStateCreateInfo depthStencilInfo;
+
+
+        // What are these?
+        VkPipelineLayout pipelineLayout = nullptr;
+        VkRenderPass renderPass = nullptr;
+        uint32_t subpass = 0;
+
+
+        
+    };
    class BbePipeline {
     public:
     BbePipeline(
@@ -13,7 +32,7 @@ namespace bbe
         const std::string& vertFilepath,
         const std::string& fragFilepath, 
         const PipelineConfigInfo& configInfo);
-    ~BbePipeline() {}
+    ~BbePipeline();
     BbePipeline(const BbePipeline&) = delete;
     void operator=(const BbePipeline&) = delete;
 
