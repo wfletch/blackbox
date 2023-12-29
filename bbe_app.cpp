@@ -2,9 +2,19 @@
 #include <stdexcept>
 #include <iostream>
 #include <array>
+#include <ctime>
+#include <cstdlib> 
+
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE //0 to -1, not -1 to 1
+#include "glm/glm.hpp"
+
 
 namespace bbe {
-
+    struct SimplePushConstantData {
+        glm::vec2 offset;
+        alignas(16) glm::vec3 color;
+    };
     FirstApp::FirstApp() {
         loadModels();
         createPipelineLayout();
@@ -51,17 +61,36 @@ namespace bbe {
     }
     void FirstApp::loadModels() {
         std::vector<BbeModel::Vertex> vertices{};
-        sierpinski(vertices, 0, {-0.5f, 0.5f}, {0.5f, 0.5f}, {0.0f, -0.5f});
+        srand((unsigned int)time(NULL));
+        for (int x = 0; x < 50; x++) {
+            for (int y =0; y < 50; y++)
+            {
+                float rand_r = (rand()%10) / 10.0;
+                float rand_g = (rand()%10) / 10.0;
+                float rand_b = (rand()%10) / 10.0;
+                float x_loc = -1.0f + (((rand()%11)/10.0) * 2);
+                float y_loc = -1.0f + (((rand()%11)/10.0) * 2); 
+                // std::cout << y_loc << "\n";
+            vertices.push_back({{x_loc,y_loc}, {rand_r,rand_g,rand_b}});
+            }
+        }
         bbeModel = std::make_unique<BbeModel>(bbeDevice, vertices);
     }
 
     void FirstApp::createPipelineLayout() {
+
+
+        VkPushConstantRange pushConstantRange{};
+        pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+        pushConstantRange.offset = 0;
+        pushConstantRange.size = sizeof (SimplePushConstantData);
+
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         pipelineLayoutInfo.setLayoutCount = 0;
         pipelineLayoutInfo.pSetLayouts = nullptr;
-        pipelineLayoutInfo.pushConstantRangeCount = 0;
-        pipelineLayoutInfo.pPushConstantRanges = nullptr;
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
 
         if (vkCreatePipelineLayout(bbeDevice.device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
             throw std::runtime_error("Failed to create pipeline layout");
@@ -103,6 +132,8 @@ namespace bbe {
 
     }
     void FirstApp::recordCommandBuffer(int imageIndex){
+            static int frame = 0;
+            frame = (frame + 1) % 1000;
             VkCommandBufferBeginInfo beginInfo{};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
             if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
@@ -118,7 +149,7 @@ namespace bbe {
             renderPassInfo.renderArea.extent = bbeSwapChain->getSwapChainExtent();
 
             std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {0.1f, 0.1f, 0.1f, 1.0f};
+            clearValues[0].color = {0.01f, 0.1f, 0.1f, 1.0f};
             clearValues[1].depthStencil = {1.0f, 0}; // 0 = CLOSEST
 
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -140,7 +171,19 @@ namespace bbe {
              
             bbePipeline->bind(commandBuffers[imageIndex]);
             bbeModel->bind(commandBuffers[imageIndex]);
-            bbeModel->draw(commandBuffers[imageIndex]);
+            
+            for (int j = 0; j< 1; j++) {
+                SimplePushConstantData push {};
+                float offset_x = (((rand()%11)/10.0)) ;
+                float offset_y = (((rand()%11)/10.0));
+                // float offset_z = (((rand()%11)/10.0));
+                push.offset = {offset_x + frame * 0.002f ,offset_y + frame* 0.002f}; 
+
+                vkCmdPushConstants(commandBuffers[imageIndex], pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0 ,sizeof(SimplePushConstantData), &push);
+                bbeModel->draw(commandBuffers[imageIndex]);
+                
+            }
+        
             
             vkCmdEndRenderPass(commandBuffers[imageIndex]);
             if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
