@@ -5,6 +5,7 @@
 #include "bbe_device.hpp"
 #include "bbe_swap_chain.hpp"
 #include "bbe_model.hpp"
+#include "bbe_engine_object.hpp"
 #include <memory>
 #include <vector>
 namespace bbe {
@@ -33,14 +34,15 @@ namespace bbe {
             glm::vec2 left,
             glm::vec2 right,
             glm::vec2 top);
-        void loadModels();
+        void loadGameObjects();
         void recreateSwapChain();
         void recordCommandBuffer(int imageIndex);
+        void renderGameObjects(VkCommandBuffer commandBuffer);
 
         
 
 
-        BbeWindow bbeWindow{WIDTH, HEIGHT, "Hello, Vulkan!"};
+        BbeWindow bbeWindow{WIDTH, HEIGHT, "Blackbox"};
         BbeDevice bbeDevice{bbeWindow};
         // Order is important! ru like a stack.
         std::unique_ptr<BbeSwapChain> bbeSwapChain;
@@ -48,7 +50,7 @@ namespace bbe {
         std::unique_ptr<BbePipeline> bbePipeline;
         VkPipelineLayout pipelineLayout;
         std::vector<VkCommandBuffer> commandBuffers;
-        std::unique_ptr<BbeModel> bbeModel;
+        std::vector<BbeGameObject> gameObjects;
         //  bbePipeline{bbeDevice, "./compiled_shaders/simple_shader.vert.spv", "./compiled_shaders/simple_shader.frag.spv", BbePipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT)};
         
     };

@@ -8,15 +8,17 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE //0 to -1, not -1 to 1
 #include "glm/glm.hpp"
+#include "glm/gtc/constants.hpp"
 
 
 namespace bbe {
     struct SimplePushConstantData {
+        glm::mat2 transform{1.f}; //main Diagonal
         glm::vec2 offset;
         alignas(16) glm::vec3 color;
     };
     FirstApp::FirstApp() {
-        loadModels();
+        loadGameObjects();
         createPipelineLayout();
         recreateSwapChain();
         createCommandBuffers();
@@ -59,22 +61,43 @@ namespace bbe {
         sierpinski(vertices, depth - 1, leftTop, rightTop, top);
     }
     }
-    void FirstApp::loadModels() {
+    void FirstApp::loadGameObjects() {
         std::vector<BbeModel::Vertex> vertices{};
-        srand((unsigned int)time(NULL));
-        for (int x = 0; x < 50; x++) {
-            for (int y =0; y < 50; y++)
-            {
-                float rand_r = (rand()%10) / 10.0;
-                float rand_g = (rand()%10) / 10.0;
-                float rand_b = (rand()%10) / 10.0;
-                float x_loc = -1.0f + (((rand()%11)/10.0) * 2);
-                float y_loc = -1.0f + (((rand()%11)/10.0) * 2); 
-                // std::cout << y_loc << "\n";
-            vertices.push_back({{x_loc,y_loc}, {rand_r,rand_g,rand_b}});
-            }
+
+
+        //This is an Object
+        vertices.push_back({{-1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        
+        // // Background
+        // vertices.push_back({{-1.0f,-1.0f}, {1.0f,1.0f, 1.0f}});
+        // vertices.push_back({{1.0f,-1.0f}, {1.0f,1.0f, 1.0f}});
+        // vertices.push_back({{-1.0f,1.0f}, {1.0f,1.0f, 1.0f}});
+        // vertices.push_back({{1.0f,-1.0f}, {1.0f,1.0f, 1.0f}});
+        // vertices.push_back({{1.0f,1.0f}, {1.0f,1.0f, 1.0f}});
+        // vertices.push_back({{-1.0f,1.0f}, {1.0f,1.0f, 1.0f}});
+
+        std::vector<glm::vec3> colors{
+        {1.f, .7f, .73f},
+        {1.f, .87f, .73f},
+        {1.f, 1.f, .73f},
+        {.73f, 1.f, .8f},
+        {.73, .88f, 1.f}  //
+    };       
+    for (int i = 0; i < 50; i++) {
+        auto bbeModel = std::make_shared<BbeModel>(bbeDevice, vertices);
+        auto triangle = BbeGameObject::createGameObject();
+        triangle.model = bbeModel;
+        triangle.color = colors[i % colors.size()];
+        triangle.transform2d.translation.x = .0f;
+        triangle.transform2d.scale = glm::vec2(.5f) + i * 0.025f;
+        triangle.transform2d.rotation = i * glm::pi<float>() * .025f;
+        gameObjects.push_back(std::move(triangle));
         }
-        bbeModel = std::make_unique<BbeModel>(bbeDevice, vertices);
     }
 
     void FirstApp::createPipelineLayout() {
@@ -132,8 +155,6 @@ namespace bbe {
 
     }
     void FirstApp::recordCommandBuffer(int imageIndex){
-            static int frame = 0;
-            frame = (frame + 1) % 1000;
             VkCommandBufferBeginInfo beginInfo{};
             beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
             if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS) {
@@ -149,7 +170,7 @@ namespace bbe {
             renderPassInfo.renderArea.extent = bbeSwapChain->getSwapChainExtent();
 
             std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {0.01f, 0.1f, 0.1f, 1.0f};
+            clearValues[0].color = {1.0f, 1.0f, 1.0f, 1.0f};
             clearValues[1].depthStencil = {1.0f, 0}; // 0 = CLOSEST
 
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -169,21 +190,7 @@ namespace bbe {
             vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
             vkCmdSetScissor(commandBuffers[imageIndex], 0,1, &scissor);
              
-            bbePipeline->bind(commandBuffers[imageIndex]);
-            bbeModel->bind(commandBuffers[imageIndex]);
-            
-            for (int j = 0; j< 1; j++) {
-                SimplePushConstantData push {};
-                float offset_x = (((rand()%11)/10.0)) ;
-                float offset_y = (((rand()%11)/10.0));
-                // float offset_z = (((rand()%11)/10.0));
-                push.offset = {offset_x + frame * 0.002f ,offset_y + frame* 0.002f}; 
-
-                vkCmdPushConstants(commandBuffers[imageIndex], pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0 ,sizeof(SimplePushConstantData), &push);
-                bbeModel->draw(commandBuffers[imageIndex]);
-                
-            }
-        
+            renderGameObjects(commandBuffers[imageIndex]);
             
             vkCmdEndRenderPass(commandBuffers[imageIndex]);
             if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS) {
@@ -215,6 +222,28 @@ namespace bbe {
                 createCommandBuffers();
             }
         }
+    }
+
+    void FirstApp::renderGameObjects(VkCommandBuffer commandBuffer) {
+
+        int i = 0;
+        for (auto& obj : gameObjects) {
+            i += 1;
+            obj.transform2d.rotation = glm::mod<float>(obj.transform2d.rotation + 0.001f * i, 2.f * glm::pi<float>());
+        }
+
+        bbePipeline->bind(commandBuffer);
+        for (auto& obj: gameObjects) {
+            obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + 0.01f, glm::two_pi<float>());
+            SimplePushConstantData push {};
+            push.offset = obj.transform2d.translation;
+            push.color = obj.color;
+            push.transform = obj.transform2d.mat2();
+
+            vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0 ,sizeof(SimplePushConstantData), &push);
+            obj.model->bind(commandBuffer);
+            obj.model->draw(commandBuffer);
+        }   
     }
     void FirstApp::drawFrame() {
         uint32_t imageIndex;
