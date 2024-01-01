@@ -72,7 +72,15 @@ namespace bbe {
         vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
         vertices.push_back({{1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
         vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
-        
+
+
+        vertices.push_back({{-1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+
         // // Background
         // vertices.push_back({{-1.0f,-1.0f}, {1.0f,1.0f, 1.0f}});
         // vertices.push_back({{1.0f,-1.0f}, {1.0f,1.0f, 1.0f}});
@@ -82,11 +90,11 @@ namespace bbe {
         // vertices.push_back({{-1.0f,1.0f}, {1.0f,1.0f, 1.0f}});
 
         std::vector<glm::vec3> colors{
-        {1.f, .7f, .73f},
-        {1.f, .87f, .73f},
-        {1.f, 1.f, .73f},
-        {.73f, 1.f, .8f},
-        {.73, .88f, 1.f}  //
+        {234.0/255.0, 242.0/255.0, 239.0/255.0},
+        {145.0/255.0, 47.0/255.0, 86.0/255.0},
+        {82.0/255.0, 25.0/255.0, 69.0/255.0},
+        {54.0/255.0f, 31.0/255.0, 39.02/255.0},
+        {13.0/255.0, 9.0/255.0, 10.0/255.0}  //
     };       
     for (int i = 0; i < 50; i++) {
         auto bbeModel = std::make_shared<BbeModel>(bbeDevice, vertices);
@@ -170,7 +178,7 @@ namespace bbe {
             renderPassInfo.renderArea.extent = bbeSwapChain->getSwapChainExtent();
 
             std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {1.0f, 1.0f, 1.0f, 1.0f};
+            clearValues[0].color = {.01f, .01f, .01f, 1.0f};
             clearValues[1].depthStencil = {1.0f, 0}; // 0 = CLOSEST
 
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
@@ -229,12 +237,12 @@ namespace bbe {
         int i = 0;
         for (auto& obj : gameObjects) {
             i += 1;
-            obj.transform2d.rotation = glm::mod<float>(obj.transform2d.rotation + 0.001f * i, 2.f * glm::pi<float>());
+            obj.transform2d.rotation = glm::mod<float>(obj.transform2d.rotation + 0.0001f * i, 2.f * glm::pi<float>());
         }
 
         bbePipeline->bind(commandBuffer);
         for (auto& obj: gameObjects) {
-            obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + 0.01f, glm::two_pi<float>());
+            obj.transform2d.rotation = glm::mod(obj.transform2d.rotation + 0.001f, glm::two_pi<float>());
             SimplePushConstantData push {};
             push.offset = obj.transform2d.translation;
             push.color = obj.color;
