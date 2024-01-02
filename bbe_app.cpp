@@ -64,22 +64,26 @@ namespace bbe {
     void FirstApp::loadGameObjects() {
         std::vector<BbeModel::Vertex> vertices{};
 
+        float mult_factor = 3.f;
+        vertices.push_back({{-1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+        vertices.push_back({{-1.0f/mult_factor,1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
 
-        //This is an Object
-        vertices.push_back({{-1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // //This is an Object
+        // vertices.push_back({{-1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // vertices.push_back({{1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
 
 
-        vertices.push_back({{-1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // vertices.push_back({{-1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // vertices.push_back({{1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // vertices.push_back({{1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
+        // vertices.push_back({{-1.0f/2.0f,1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
 
         // // Background
         // vertices.push_back({{-1.0f,-1.0f}, {1.0f,1.0f, 1.0f}});
@@ -90,18 +94,18 @@ namespace bbe {
         // vertices.push_back({{-1.0f,1.0f}, {1.0f,1.0f, 1.0f}});
 
         std::vector<glm::vec3> colors{
-        {234.0/255.0, 242.0/255.0, 239.0/255.0},
-        {145.0/255.0, 47.0/255.0, 86.0/255.0},
-        {82.0/255.0, 25.0/255.0, 69.0/255.0},
-        {54.0/255.0f, 31.0/255.0, 39.02/255.0},
-        {13.0/255.0, 9.0/255.0, 10.0/255.0}  //
+        {130.0/255.0, 209.0/255.0, 115.0/255.0},
+        // {145.0/255.0, 47.0/255.0, 86.0/255.0},
+        // {82.0/255.0, 25.0/255.0, 69.0/255.0},
+        {149.0/255.0, 163.0/255.0, 179.0/255.0},
+        // {13.0/255.0, 9.0/255.0, 10.0/255.0}  //
     };       
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 20; i++) {
         auto bbeModel = std::make_shared<BbeModel>(bbeDevice, vertices);
         auto triangle = BbeGameObject::createGameObject();
         triangle.model = bbeModel;
         triangle.color = colors[i % colors.size()];
-        triangle.transform2d.translation.x = .0f;
+        triangle.transform2d.translation.x = .01f;
         triangle.transform2d.scale = glm::vec2(.5f) + i * 0.025f;
         triangle.transform2d.rotation = i * glm::pi<float>() * .025f;
         gameObjects.push_back(std::move(triangle));
@@ -178,7 +182,7 @@ namespace bbe {
             renderPassInfo.renderArea.extent = bbeSwapChain->getSwapChainExtent();
 
             std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {.01f, .01f, .01f, 1.0f};
+            clearValues[0].color = {.075f, .05f, .2f, 1.0f};
             clearValues[1].depthStencil = {1.0f, 0}; // 0 = CLOSEST
 
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
