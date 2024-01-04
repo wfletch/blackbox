@@ -62,12 +62,19 @@ namespace bbe {
     }
     }
     void FirstApp::loadGameObjects() {
-        std::vector<BbeModel::Vertex> vertices{};
+        std::vector<BbeModel::Vertex> vertices_back{};
+        std::vector<BbeModel::Vertex> vertices_front{};
 
-        float mult_factor = 3.f;
-        vertices.push_back({{-1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
-        vertices.push_back({{-1.0f/mult_factor,1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+        float mult_factor = 0.85f;
+        vertices_back.push_back({{-1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+        vertices_back.push_back({{1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+        vertices_back.push_back({{-1.0f/mult_factor,1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+        
+        mult_factor = 0.8f;
+        vertices_front.push_back({{-1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+        vertices_front.push_back({{1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+        vertices_front.push_back({{-1.0f/mult_factor,1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+
 
         // //This is an Object
         // vertices.push_back({{-1.0f/2.0f,-1.0f/2.0f}, {0.0f,1.0f, 1.0f}});
@@ -94,20 +101,28 @@ namespace bbe {
         // vertices.push_back({{-1.0f,1.0f}, {1.0f,1.0f, 1.0f}});
 
         std::vector<glm::vec3> colors{
-        {130.0/255.0, 209.0/255.0, 115.0/255.0},
-        // {145.0/255.0, 47.0/255.0, 86.0/255.0},
-        // {82.0/255.0, 25.0/255.0, 69.0/255.0},
-        {149.0/255.0, 163.0/255.0, 179.0/255.0},
+        {77/255.0, 157/255.0, 224/255.0},
+        {225.0/255.0, 85.0/255.0, 84.0/255.0},
+         {225.0/255.0, 188.0/255.0, 41.0/255.0},
+        {59.0/255.0, 178.0/255.0, 115.0/255.0},
         // {13.0/255.0, 9.0/255.0, 10.0/255.0}  //
-    };       
-    for (int i = 0; i < 20; i++) {
-        auto bbeModel = std::make_shared<BbeModel>(bbeDevice, vertices);
+        };       
+    for (int i = 0; i < 30; i++) {
+        auto bbeModel_back = std::make_shared<BbeModel>(bbeDevice, vertices_back);
+        auto bbeModel_front= std::make_shared<BbeModel>(bbeDevice, vertices_front);
         auto triangle = BbeGameObject::createGameObject();
-        triangle.model = bbeModel;
+        triangle.model = bbeModel_back;
         triangle.color = colors[i % colors.size()];
         triangle.transform2d.translation.x = .01f;
-        triangle.transform2d.scale = glm::vec2(.5f) + i * 0.025f;
+        // triangle.transform2d.scale = glm::vec2(.5f) + i * 0.025f;
         triangle.transform2d.rotation = i * glm::pi<float>() * .025f;
+
+        gameObjects.push_back(std::move(triangle));
+        triangle.model = bbeModel_front;
+        triangle.color = colors[(i+3) % colors.size()];
+        triangle.transform2d.translation.x = .01f;
+        triangle.transform2d.scale = glm::vec2(.5f) + i * 0.025f;
+        // triangle.transform2d.rotation = i * glm::pi<float>() * .025f;
         gameObjects.push_back(std::move(triangle));
         }
     }
