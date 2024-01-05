@@ -31,7 +31,8 @@ namespace bbe {
         BbeGameObject &operator=(const BbeGameObject &) = delete;
         BbeGameObject(BbeGameObject&&) = default;
         BbeGameObject &operator=(BbeGameObject&&) = default;
-
+        int32_t state = 0;
+        void setId(int32_t state){state = state;}
         const id_t getId(){return id;}
         std::shared_ptr<BbeModel> model{};
         glm::vec3 color{};
