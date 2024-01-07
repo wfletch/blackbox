@@ -65,15 +65,15 @@ namespace bbe {
         std::vector<BbeModel::Vertex> vertices_back{};
         std::vector<BbeModel::Vertex> vertices_front{};
 
-        float mult_factor = 0.85f;
+        float mult_factor = 65.0f;
         vertices_back.push_back({{-1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
         vertices_back.push_back({{1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
         vertices_back.push_back({{-1.0f/mult_factor,1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
         
-        mult_factor = 0.8f;
-        vertices_front.push_back({{-1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
-        vertices_front.push_back({{1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
-        vertices_front.push_back({{-1.0f/mult_factor,1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+        // mult_factor = 0.8f;
+        // vertices_front.push_back({{-1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+        // vertices_front.push_back({{1.0f/mult_factor,-1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
+        // vertices_front.push_back({{-1.0f/mult_factor,1.0f/mult_factor}, {0.0f,1.0f, 1.0f}});
 
 
         // //This is an Object
@@ -101,28 +101,48 @@ namespace bbe {
         // vertices.push_back({{-1.0f,1.0f}, {1.0f,1.0f, 1.0f}});
 
         std::vector<glm::vec3> colors{
-        {77/255.0, 157/255.0, 224/255.0},
-        {225.0/255.0, 85.0/255.0, 84.0/255.0},
-         {225.0/255.0, 188.0/255.0, 41.0/255.0},
-        {59.0/255.0, 178.0/255.0, 115.0/255.0},
-        // {13.0/255.0, 9.0/255.0, 10.0/255.0}  //
+        {79/255.0, 93/255.0, 117/255.0},
+        {191/255.0, 192.0/255.0, 192.0/255.0},
+         {255.0/255.0, 255.0/255.0, 255.0/255.0},
+        {239.0/255.0, 131.0/255.0, 84.0/255.0},
+        // {198.0/255.0, 226.0/255.0, 170.0/255.0}  //
         };       
-    for (int i = 0; i < 30; i++) {
+    for (int i = 30; i > 0; i-=3) {
         auto bbeModel_back = std::make_shared<BbeModel>(bbeDevice, vertices_back);
-        auto bbeModel_front= std::make_shared<BbeModel>(bbeDevice, vertices_front);
+        // auto bbeModel_front= std::make_shared<BbeModel>(bbeDevice, vertices_front);
         auto triangle = BbeGameObject::createGameObject();
         triangle.model = bbeModel_back;
         triangle.color = colors[i % colors.size()];
-        triangle.transform2d.translation.x = .01f;
-        // triangle.transform2d.scale = glm::vec2(.5f) + i * 0.025f;
-        triangle.transform2d.rotation = i * glm::pi<float>() * .025f;
+        if (i%4 == 0) {
+            triangle.transform2d.translation.x = (i * 0.017);
+            triangle.transform2d.translation.y = (-i * 0.03);
+        }
+        else if (i % 3 == 0) {
+            triangle.transform2d.translation.y = (i * 0.02);
+            triangle.transform2d.translation.x = (-i * 0.05);
+            /* code */
+        } else if (i % 2  == 0)
+        {
+            /* code */
+            triangle.transform2d.translation.y = (-i * 0.01);
+            triangle.transform2d.translation.x = (-i * 0.02);
+        } else {
 
-        gameObjects.push_back(std::move(triangle));
-        triangle.model = bbeModel_front;
-        triangle.color = colors[(i+3) % colors.size()];
-        triangle.transform2d.translation.x = .01f;
-        triangle.transform2d.scale = glm::vec2(.5f) + i * 0.025f;
-        // triangle.transform2d.rotation = i * glm::pi<float>() * .025f;
+            triangle.transform2d.translation.y = (i * 0.02);
+            triangle.transform2d.translation.x = (i * 0.023);
+        }
+        
+        
+        
+        triangle.transform2d.scale = glm::vec2(.9f) + i * 0.23f;
+        triangle.transform2d.rotation = i * glm::pi<float>() * .286f;
+
+        // gameObjects.push_back(std::move(triangle));
+        // triangle.model = bbeModel_front;
+        // triangle.color = colors[(i+3) % colors.size()];
+        // triangle.transform2d.translation.x = .01f;
+        // triangle.transform2d.scale = glm::vec2(.5f) + i * 0.025f;
+        // // triangle.transform2d.rotation = i * glm::pi<float>() * .025f;
         gameObjects.push_back(std::move(triangle));
         }
     }
@@ -197,7 +217,7 @@ namespace bbe {
             renderPassInfo.renderArea.extent = bbeSwapChain->getSwapChainExtent();
 
             std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {.075f, .05f, .2f, 1.0f};
+            clearValues[0].color = {25.0/255.0f, 19.0/255.0f, 26/255.0f, 0.8f};
             clearValues[1].depthStencil = {1.0f, 0}; // 0 = CLOSEST
 
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
