@@ -101,41 +101,21 @@ namespace bbe {
         // vertices.push_back({{-1.0f,1.0f}, {1.0f,1.0f, 1.0f}});
 
         std::vector<glm::vec3> colors{
-        {79/255.0, 93/255.0, 117/255.0},
-        {191/255.0, 192.0/255.0, 192.0/255.0},
-         {255.0/255.0, 255.0/255.0, 255.0/255.0},
-        {239.0/255.0, 131.0/255.0, 84.0/255.0},
+        {222/255.0, 222/255.0, 222/255.0},
+        // {191/255.0, 192.0/255.0, 192.0/255.0},
+        //  {255.0/255.0, 255.0/255.0, 255.0/255.0},
+        // {239.0/255.0, 131.0/255.0, 84.0/255.0},
         // {198.0/255.0, 226.0/255.0, 170.0/255.0}  //
         };       
-    for (int i = 30; i > 0; i-=3) {
+    for (int i = 0; i < 3; i+=1) {
         auto bbeModel_back = std::make_shared<BbeModel>(bbeDevice, vertices_back);
         // auto bbeModel_front= std::make_shared<BbeModel>(bbeDevice, vertices_front);
         auto triangle = BbeGameObject::createGameObject();
         triangle.model = bbeModel_back;
         triangle.color = colors[i % colors.size()];
-        if (i%4 == 0) {
-            triangle.transform2d.translation.x = (i * 0.017);
-            triangle.transform2d.translation.y = (-i * 0.03);
-        }
-        else if (i % 3 == 0) {
-            triangle.transform2d.translation.y = (i * 0.02);
-            triangle.transform2d.translation.x = (-i * 0.05);
-            /* code */
-        } else if (i % 2  == 0)
-        {
-            /* code */
-            triangle.transform2d.translation.y = (-i * 0.01);
-            triangle.transform2d.translation.x = (-i * 0.02);
-        } else {
-
-            triangle.transform2d.translation.y = (i * 0.02);
-            triangle.transform2d.translation.x = (i * 0.023);
-        }
         
-        
-        
-        triangle.transform2d.scale = glm::vec2(.9f) + i * 0.23f;
-        triangle.transform2d.rotation = i * glm::pi<float>() * .286f;
+        triangle.transform2d.scale = glm::vec2(.9f) * 30.0f;
+        triangle.transform2d.rotation = i * glm::pi<float>() * 0.026f;
 
         // gameObjects.push_back(std::move(triangle));
         // triangle.model = bbeModel_front;
@@ -217,7 +197,7 @@ namespace bbe {
             renderPassInfo.renderArea.extent = bbeSwapChain->getSwapChainExtent();
 
             std::array<VkClearValue, 2> clearValues{};
-            clearValues[0].color = {25.0/255.0f, 19.0/255.0f, 26/255.0f, 0.8f};
+            clearValues[0].color = {0.0/255.0f, 0.0/255.0f, 0.0/255.0f, 0.8f};
             clearValues[1].depthStencil = {1.0f, 0}; // 0 = CLOSEST
 
             renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
