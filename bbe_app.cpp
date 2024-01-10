@@ -101,13 +101,13 @@ namespace bbe {
         // vertices.push_back({{-1.0f,1.0f}, {1.0f,1.0f, 1.0f}});
 
         std::vector<glm::vec3> colors{
-        {222/255.0, 222/255.0, 222/255.0},
+        {255/255.0, 105/255.0, 180/255.0},
         // {191/255.0, 192.0/255.0, 192.0/255.0},
         //  {255.0/255.0, 255.0/255.0, 255.0/255.0},
         // {239.0/255.0, 131.0/255.0, 84.0/255.0},
         // {198.0/255.0, 226.0/255.0, 170.0/255.0}  //
         };       
-    for (int i = 0; i < 3; i+=1) {
+    for (int i = 0; i < 1; i+=1) {
         auto bbeModel_back = std::make_shared<BbeModel>(bbeDevice, vertices_back);
         // auto bbeModel_front= std::make_shared<BbeModel>(bbeDevice, vertices_front);
         auto triangle = BbeGameObject::createGameObject();
